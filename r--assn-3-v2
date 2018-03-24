@@ -1,0 +1,36 @@
+library(GISTools)
+library(raster)
+data(tornados)
+
+r = raster(nrow = 180, ncols = 360, ext = extent(us_states2))
+t2 <- as(torn2, "SpatialPoints")
+r <- rasterize(t2, r, fun=sum)
+
+plot(r, col = "white")
+plot(us_states2, add = T, border = "grey")
+plot(r, add = T)
+
+us_outline <- as(us_states2, "SpatialLinesDataFrame")
+r <- raster(nrow = 180, ncols = 360, ext = extent(us_states2))
+r <- rasterize(us_outline, r, "STATE_FIPS")
+
+plot(r)
+
+r <- raster(nrow = 180, ncols = 360, ext = extent(us_states2))
+r <- rasterize(us_states2, r, "POP1997")
+
+plot(r)
+
+r <- raster(nrow = 60, ncols = 120, ext = extent(us_states2))
+r <- rasterize(us_states2, r, "STATE_FIPS")
+
+g <- as(r, 'SpatialGridDataFrame')
+p <- as(r, 'SpatialPixelsDataFrame')
+
+# not run
+image(g, col = topo.colors(51))
+points(p, cex = 0.5)
+
+
+par(mar=c(0,0,0,0))
+plot(p, cex = 0.5, pch = 1, col = p$layer)
