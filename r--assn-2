@@ -1,0 +1,178 @@
+## Heather Ketten
+## GEOG 410 - Spring 15-16
+## Assignment 2
+## Chicago Homicides
+
+# packages needed include:
+library(GISTools)
+library(raster)
+library(rgeos)
+library(RColorBrewer)
+library(rgdal)
+
+# view your current working directory
+getwd()
+# set your working directory to a desired folder
+setwd("C:/Users/Heather/Desktop/geog410/assn2")
+# list all files in this directory
+list.files()
+
+# read the csv
+data = read.csv("chicagohomicides2015.csv")
+# attach the data so that you can call the variables in this dataset
+attach(data)
+# see the names of the variables in this dataset
+names(data)
+# see what the first several rows look like
+head(data)
+
+# split the date and time stamp values from one column to two
+# strsplit function will split the column Date by a delimited character, in this case a space (' ')
+date = data.frame(do.call('rbind', strsplit(as.character(data$Date),' ',fixed=TRUE)))
+
+# because there is a 12 hour time stamp with AM and PM, I need to rejoin the time column using the past function
+date$X2 = paste(date$X2, date$X3, sep=' ')
+data = cbind(data, date$X1, date$X2)
+# view the column headings to see what needs updating
+colnames(data)
+
+# we want to change "Date" to "OldDate" (in case we want to use it again), and then give
+# appropriate names to the last 2 column headings. for the latter, we use the ncol function
+# that returns the total number of columns
+colnames(data)[3]="OldDate"
+colnames(data)[ncol(data)-1]="Date"
+colnames(data)[ncol(data)]="Time"
+# check to see if the renaming was sucessful
+head(data)
+
+
+# determine the number of days in 2015 in which at least one homicide occurred
+# write the data back to your csv, name the new csv file
+write.csv(data, file = "homicides.csv")
+# unattach the data set
+rm(data)
+# reopen and reattach the dataset
+data = read.csv("homicides.csv")
+attach(data)
+# view the first several columns of the dataset
+head(data)
+# count the number of unique dates by applying unique function to date column
+length(unique(Date))
+
+
+#determine the number of days in 2015 in which 1, 2, etc. homicides occurred
+# use the table function to create table with date and number for each date
+frequency.table = table(Date)
+# convert to data.frame object to perfrom calculations
+frequency.df = as.data.frame(frequency.table)
+# look at it
+frequency.df
+# calculate number of rows with specific frequency
+one.homicide = nrow(frequency.df[frequency.df$Freq == 1,])
+# apply standard r functions to learn more such as maximum number of homicides
+max(frequency.df$Freq)
+
+
+# create a histogram of frequency of number of homicides in one day and plot number in each location
+
+# hist of frequency of days with x number of homicides
+hist(frequency.df$Freq, main = "Chicago Homicides 2015", xlab="Number of Homicides", ylab = "Days with this Frequency", col = "gray")
+
+# save it
+dev.copy(png,'chicago_hist.png')
+dev.off()
+
+
+# plot locations and change symbol size
+plot(data$Longitude,data$Latitude, cex=(frequency.df$Freq), col="black", pch=20, main = "Chicago Homicides 2015 Map", xlab = "Longitude", ylab = "Latitude")
+
+# save it
+
+dev.copy(png,'chicago_loc_map.png')
+dev.off()
+
+
+# read the census tract and city boundary shape files
+tracts = shapefile("C:/Users/Heather/Desktop/geog410/assn2/cb_2014_17_tract_500k/cb_2014_17_tract_500k.shp")
+boundary = shapefile("C:/Users/Heather/Desktop/geog410/assn2/BoundariesCity/geo_export_1bf98cda-e262-47aa-aa9e-a8210826e230.shp")
+
+# select only the city of chicago polygons
+intersected = intersect(tracts,boundary)
+
+# omit the NA values
+intersected2 = na.omit(intersected)
+
+# read race data
+data = read.csv("C:/Users/Heather/Desktop/geog410/assn2/aff_download/ACS_14_5YR_B02001_with_ann.csv")
+
+# create simplified data with only necesary variables
+race.data = data[c("GEO.id","HD01_VD01","HD01_VD02","HD01_VD03")]
+
+# change the name of geo id so it can be merged with shape file
+colnames(race.data)[1:4] = c("AFFGEOID","Total","White","Black")
+
+# merge the two datasets
+merged = merge(intersected,race.data,by='AFFGEOID')
+
+# change all NAs to O
+merged[is.na(merged$Black)] = 0
+merged[is.na(merged$White)] = 0
+merged[is.na(merged$Total)] = 0
+
+
+# create choropleth map
+
+# create spdf from homicide data
+homicide.sp = read.csv("C:/Users/Heather/Desktop/geog410/assn2/homicides.csv")
+homicide.sp2 = na.omit(homicide.sp)
+coords = cbind(homicide.sp2$Longitude, homicide.sp2$Latitude)
+homicide.spdf = SpatialPointsDataFrame(coords,data=data.frame(homicide.sp2))
+
+# determine min and max coords of homicide cases = bounding box
+minlat = min(homicide.spdf$Latitude - .02)
+maxlat = max(homicide.spdf$Latitude + .02)
+minlong = min(homicide.spdf$Longitude - .02)
+maxlong = max(homicide.spdf$Longitude + .01)
+
+# create color scheme
+shades = auto.shading(as.numeric(merged$Black),cols=brewer.pal(9,"Greens"))
+
+# create choropleth
+choropleth(merged, merged$Black, shading = shades, xlim = c(minlong,maxlong), ylim = c(minlat,maxlat), bg = "lightblue")
+# add homicide locations
+plot(homicide.spdf, add = TRUE, cex=0.8, col="red", pch=20)
+
+# save it
+
+dev.copy(png,'chicago_choropleth.png')
+dev.off()
+
+# number of homicides in each census tract using poly.counts.
+homicide.counts = poly.counts(homicide.spdf,merged)
+homicide.counts
+
+# table to see the frequency of homicides in each census tract.
+frequency.table = table(homicide.counts)
+nrow(frequency.table)
+merged$homicides = homicide.counts
+#Save the shapefile.
+shapefile(merged, "Illinois_Race.shp",overwrite=TRUE)
+
+# re-open the shapefile (closing and reopening good check that it works)
+df = data.frame(shapefile("Illinois_Race.shp"))
+# Calculate proportion of population that is black
+df$pBlack = (as.numeric(df$Black)) / (as.numeric(df$Total))
+# Calculate proportion of population that is white.
+df$pWhite = (as.numeric(df$White)) / (as.numeric(df$Total))
+# Change all NA's to 0.
+df[is.na(df)] = 0
+
+# calculate probabilities
+# selects census tracts based on proportion of population that meets criteria
+# code here selects tracts where
+# population of people who are black is between 10% and 90%.
+selected.tracts = (df$pBlack > 0.10) & (df$pBlack < 0.90)
+# sum homicides in selected census tracts.
+sum.homicides = sum(df$homicide[selected.tracts])
+# calculate the probability(p) of homicide given the criteria.
+p = sum.homicides / sum(df$homicides)
