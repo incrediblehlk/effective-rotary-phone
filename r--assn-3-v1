@@ -1,0 +1,123 @@
+## Heather Ketten
+## GEOG 410 - Spring 15-16
+## exercise 3
+
+# packages needed include:
+library(GISTools)
+
+# figure 5.2
+data(tornados)
+
+par(mar=c(0,0,0,0))
+plot(us_states)
+
+plot(torn, add = T, pch = 1, col = "#FB6A4A4C", cex = 0.4)
+plot(us_states, add = T)
+
+summary(torn)
+
+
+index <- us_states$STATE_NAME == "Texas" |
+  us_states$STATE_NAME == "New Mexico" |
+  us_states$STATE_NAME == "Oklahoma" |
+  us_states$STATE_NAME == "Arkansas"
+AoI <- us_states[index,]
+
+plot(AoI)
+plot(torn, add = T, pch = 1, col = "#FB6A4A4C")
+
+AoI.torn <- gIntersection(AoI, torn)
+par(mar=c(0,0,0,0))
+plot(AoI)
+plot(AoI.torn, add = T, pch = 1, col = "#FB6A4A4C")
+
+#######################
+
+# figure 5.3
+
+AoI <- us_states2[us_states2$STATE_NAME == "Texas",]
+AoI.buf <- gBuffer(AoI, width = 25000)
+
+par(mar=c(0,0,0,0))
+plot(AoI.buf)
+plot(AoI, add = T, border = "blue")
+
+######################
+
+# figure 5.6
+
+data(newhaven)
+densities = poly.counts(breach,blocks) / ft2miles(ft2miles(poly.areas(blocks)))
+cor(blocks$P_OWNEROCC,densities)
+
+## [1] -0.2038
+
+plot(blocks$P_OWNEROCC,densities)
+
+breaches ~ Poisson(AREA * exp (a + b * blocks$P_OWNEROCC))
+
+breaches ~ Poisson(exp(a + b * blocks$P_OWNEROCC+log(AREA)))
+
+data(newhaven)
+
+attach(data.frame(blocks))
+
+n.breaches = poly.counts(breach,blocks)
+area = ft2miles(ft2miles(poly.areas(blocks)))
+
+model1=glm(n.breaches~P_OWNEROCC,offset=log(area),family=poisson)
+detach(data.frame(blocks))
+
+s.resids = rstandard(model1)
+
+resid.shades = shading(c(-2,2),c("red","grey","blue"))
+
+par(mar=c(0,0,0,0))
+choropleth(blocks,s.resids,resid.sshades)
+par(mar=c(5,4,4,2))
+
+
+attach(data.frame(blocks))
+n.breaches = poly.counts(breach,blocks)
+area = ft2miles(ft2miles(poly.areas(blocks)))
+model2=glm(n.breaches~P_OWNEROCC+P_VACANT,offset=log(area),family=poisson)
+s.resids.2 = rstandard(model2)
+detach(data.frame(blocks))
+
+s.resids.2 = rstandard(model2)
+par(mar=c(0,0,0,0))
+choropleth(blocks,s.resids.2,resid.shades)
+par (mar=c(5,4,4,2))
+
+######################
+
+# figure 5.12
+
+library(GISTools)
+library(raster)
+data(tornados)
+
+r = raster(nrow = 180, ncols = 360, ext = extent(us_states2))
+t2 <- as(torn2, "SpatialPoints")
+r <- rasterize(t2, r, fun=sum)
+
+plot(r, col = "white")
+plot(us_states2, add = T, border = "grey")
+plot(r, add = T)
+
+us_outline <- as(us_states2, "SpatialLinesDataFrame")
+r <- raster(nrow = 180, ncols = 360, ext = extent(us_states2))
+r <- rasterize(us_outline, r, "STATE_FIPS")
+
+r <- raster(nrow = 180, ncols = 360, ext = extent(us_states2))
+r <- rasterize(us_states2, r, "POP1997")
+
+plot(r)
+r <- raster(nrow = 60,ncols = 120, ext = extent(us_states2))
+r <- rasterize(us_states2,r,"STATE_FIPS")
+
+g <- as(r, 'SpatialGridDataFrame')
+p <- as(r, 'SpatialPixelsDataFrame')
+
+par(mar=c(0,0,0,0))
+plot(p, cex = 0.5, pch = 1, col = p$layer)
