@@ -1,0 +1,133 @@
+## ASSN 4
+
+# load required pkgs
+require(SpatialEpi)
+require(GISTools)
+require(rgdal)
+
+# read Penn lung cancer data
+data(pennLC)
+
+# extract spatial polygon info
+penn.state.latlong <- pennLC$spatial.polygon
+penn.state.utm = spTransform(penn.state.latlong,CRS("+proj=utm +zone=17 +datum=WGS84"))
+
+# set smoking rate
+smk <- pennLC$smoking$smoking * 100
+
+# reset par and mar
+par(mar =c(0,0,0,0))
+
+# for 6 maps
+#par(mfrow=c(3,2), mar=c(1,1,1,1)/2)
+
+#real.data.i <- sample(1:6, 1)
+
+# set up shading object, draw choropleth and legend
+shades <- auto.shading(smk,n=6,cols=brewer.pal(5,'Blues'))
+choropleth(penn.state.utm,smk,shades)
+choro.legend(535156.95,4387148.10,shades, title='Smoking Uptake (% of popn.)')
+
+# save map
+dev.copy(png,'C:/Users/Heather/Desktop/geog410/assn4/penn_choro1.png')
+dev.off()
+
+
+# 7.3
+
+# set up the parameters
+par(mfrow=c(3,2),mar=c(1,1,1,1)/2)
+
+# which one will be real data
+real.data.i <- sample(1:6,1)
+
+# draw 6 plots, 5 are random, 1 is real data
+for (i in 1:6) {
+  if (i == real.data.i) {
+    choropleth(penn.state.utm,smk,shades)}
+  else {
+    choropleth(penn.state.utm,sample(smk),shades)}
+}
+
+# save map
+dev.copy(png,'C:/Users/Heather/Desktop/geog410/assn4/penn_choro2.png')
+dev.off()
+
+# reset par mar
+par(mfrow=c(1,1))
+
+
+# which is real
+real.data.i
+
+
+## NEighbors
+
+require(spdep)
+penn.state.nb <- poly2nb(penn.state.utm)
+penn.state.nb
+
+## neighbor list obj
+## num regions: 67
+## num nonzero links: 346
+## percent nonzero weights: 7.708
+## avg num links: 5.164
+
+plot(penn.state.utm,border='lightgrey')
+plot(penn.state.nb,coordinates(penn.state.utm), add=TRUE,col='red')
+
+# save map
+dev.copy(png,'C:/Users/Heather/Desktop/geog410/assn4/penn_choro3.png')
+dev.off()
+
+# reset par mar
+par(mfrow=c(1,1))
+
+# calculate rook's case neighbors
+penn.state.nb2 <- poly2nb(penn.state.utm,queen=FALSE)
+# plot counties in bg
+plot(penn.state.utm,border='lightgrey')
+# plot queen's case neighbor info as network
+plot(penn.state.nb,coordinates(penn.state.utm), add=TRUE,col='blue',lwd=2)
+# overlay rook's case neighbors
+plot(penn.state.nb2,coordinates(penn.state.utm), add=TRUE,col='yellow')
+
+# save map
+dev.copy(png,'C:/Users/Heather/Desktop/geog410/assn4/penn_choro4.png')
+dev.off()
+
+# reset par mar
+par(mfrow=c(1,1))
+
+
+# convert neighbor list to listw obj using rook's case
+penn.state.lw <- nb2listw(penn.state.nb2)
+penn.state.lw
+
+smk.lagged.means <- lag.listw(penn.state.lw,smk)
+choropleth(penn.state.utm,smk.lagged.means,shades)
+
+plot(smk,smk.lagged.means,asp=1,xlim=range(smk),ylim=range(smk))
+abline(a=0,b=1)
+abline(v=mean(smk),lty=2)
+abline(h=mean(smk.lagged.means),lty=2)
+
+
+# save map
+dev.copy(png,'C:/Users/Heather/Desktop/geog410/assn4/penn_choro5.png')
+dev.off()
+
+# reset par mar
+par(mfrow=c(1,1))
+par(mar=c(4,4,0.5,0.5))
+
+
+moran.plot(smk,penn.state.lw)
+
+
+# save map
+dev.copy(png,'C:/Users/Heather/Desktop/geog410/assn4/penn_choro6.png')
+dev.off()
+
+# reset par mar
+par(mfrow=c(1,1))
