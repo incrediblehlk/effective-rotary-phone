@@ -1,0 +1,373 @@
+#Install the necessary packages
+install.packages(("gridExtra"))
+install.packages(("ggmap"))
+install.packages(("moments"))
+install.packages (("e1071"))
+install.packages (("rJava"))
+install.packages(("OpenStreetMap"))
+install.packages('Rcpp', dependencies = TRUE)
+install.packages('ggplot2', dependencies = TRUE)
+install.packages('data.table', dependencies = TRUE)
+
+#Load the libraries
+library(gridExtra)
+library(ggmap)
+library(moments)
+library(Rcpp)
+library(e1071)
+library(ggplot2)
+library(data.table)
+library(rJava)
+library(OpenStreetMap)
+
+
+##Set working directory
+getwd() #First look to see what is the current directory 
+setwd("C:/Users/Kelly/Dropbox/2016.Dropbox/2016.09_GEOG.594.Spatial.Analysis/Assignment_1") #Then set the directory to where you want to retrieve and print data
+
+
+##Read in data
+df = data.frame(read.csv("events.csv"), header=TRUE)  #read csv file
+attach(df)  #attach dataset
+
+#Calculating descriptive statistics
+mean2016 = mean(subset(df, Year == 2016)$dead_and_missing) #calculate mean dead and missing for 2016
+mean2015 = mean(subset(df, Year == 2015)$dead_and_missing) 
+mean2014 = mean(subset(df, Year == 2014)$dead_and_missing) 
+mean2013 = mean(subset(df, Year == 2013)$dead_and_missing) 
+mean2012 = mean(subset(df, Year == 2012)$dead_and_missing) 
+mean2011 = mean(subset(df, Year == 2011)$dead_and_missing) 
+mean2010 = mean(subset(df, Year == 2010)$dead_and_missing) 
+mean2009 = mean(subset(df, Year == 2009)$dead_and_missing) 
+mean2008 = mean(subset(df, Year == 2008)$dead_and_missing) 
+mean2007 = mean(subset(df, Year == 2007)$dead_and_missing) 
+mean2006 = mean(subset(df, Year == 2006)$dead_and_missing) 
+mean2005 = mean(subset(df, Year == 2005)$dead_and_missing) 
+mean2004 = mean(subset(df, Year == 2004)$dead_and_missing) 
+mean2003 = mean(subset(df, Year == 2003)$dead_and_missing) 
+mean2002 = mean(subset(df, Year == 2002)$dead_and_missing) 
+mean2001 = mean(subset(df, Year == 2001)$dead_and_missing) 
+mean2000 = mean(subset(df, Year == 2000)$dead_and_missing)
+
+sd2016 = sd(subset(df, Year == 2016)$dead_and_missing) #calculate standard deviation of dead and missing for 2016
+sd2015 = sd(subset(df, Year == 2015)$dead_and_missing) 
+sd2014 = sd(subset(df, Year == 2014)$dead_and_missing) 
+sd2013 = sd(subset(df, Year == 2013)$dead_and_missing) 
+sd2012 = sd(subset(df, Year == 2012)$dead_and_missing) 
+sd2011 = sd(subset(df, Year == 2011)$dead_and_missing) 
+sd2010 = sd(subset(df, Year == 2010)$dead_and_missing) 
+sd2009 = sd(subset(df, Year == 2009)$dead_and_missing) 
+sd2008 = sd(subset(df, Year == 2008)$dead_and_missing) 
+sd2007 = sd(subset(df, Year == 2007)$dead_and_missing) 
+sd2006 = sd(subset(df, Year == 2006)$dead_and_missing) 
+sd2005 = sd(subset(df, Year == 2005)$dead_and_missing) 
+sd2004 = sd(subset(df, Year == 2004)$dead_and_missing) 
+sd2003 = sd(subset(df, Year == 2003)$dead_and_missing) 
+sd2002 = sd(subset(df, Year == 2002)$dead_and_missing) 
+sd2001 = sd(subset(df, Year == 2001)$dead_and_missing) 
+sd2000 = sd(subset(df, Year == 2000)$dead_and_missing) 
+
+median2016 = median(subset(df, Year == 2016)$dead_and_missing)
+median2015 = median(subset(df, Year == 2015)$dead_and_missing)
+median2014 = median(subset(df, Year == 2014)$dead_and_missing)
+median2013 = median(subset(df, Year == 2013)$dead_and_missing)
+median2012 = median(subset(df, Year == 2012)$dead_and_missing)
+median2011 = median(subset(df, Year == 2011)$dead_and_missing)
+median2010 = median(subset(df, Year == 2010)$dead_and_missing)
+median2009 = median(subset(df, Year == 2009)$dead_and_missing)
+median2008 = median(subset(df, Year == 2008)$dead_and_missing)
+median2007 = median(subset(df, Year == 2007)$dead_and_missing)
+median2006 = median(subset(df, Year == 2006)$dead_and_missing)
+median2005 = median(subset(df, Year == 2005)$dead_and_missing)
+median2004 = median(subset(df, Year == 2004)$dead_and_missing)
+median2003 = median(subset(df, Year == 2003)$dead_and_missing)
+median2002 = median(subset(df, Year == 2002)$dead_and_missing)
+median2001 = median(subset(df, Year == 2001)$dead_and_missing)
+median2000 = median(subset(df, Year == 2000)$dead_and_missing)
+
+
+values2016 =  df[ which(df$Year==2016), ] #create an object for only 2016 data
+modevalues2016 = values2016$dead_and_missing #extract the variable for dead and missing
+mode2016 = as.numeric(names(sort(-table(modevalues2016)))[1]) #sort the dataset and read the first row (most frequent)
+
+values2015 =  df[ which(df$Year==2015), ] 
+modevalues2015 = values2015$dead_and_missing
+mode2015 = as.numeric(names(sort(-table(modevalues2015)))[1])
+
+values2014 =  df[ which(df$Year==2014), ] 
+modevalues2014 = values2014$dead_and_missing
+mode2014 = as.numeric(names(sort(-table(modevalues2014)))[1])
+
+values2013 =  df[ which(df$Year==2013), ] 
+modevalues2013 = values2013$dead_and_missing
+mode2013 = as.numeric(names(sort(-table(modevalues2013)))[1])
+
+values2012 =  df[ which(df$Year==2012), ] 
+modevalues2012 = values2012$dead_and_missing
+mode2012 = as.numeric(names(sort(-table(modevalues2012)))[1])
+
+values2011 =  df[ which(df$Year==2011), ] 
+modevalues2011 = values2011$dead_and_missing
+mode2011 = as.numeric(names(sort(-table(modevalues2011)))[1])
+
+values2010 =  df[ which(df$Year==2010), ] 
+modevalues2010 = values2010$dead_and_missing
+mode2010 = as.numeric(names(sort(-table(modevalues2010)))[1])
+
+values2009 =  df[ which(df$Year==2009), ] 
+modevalues2009 = values2009$dead_and_missing
+mode2009 = as.numeric(names(sort(-table(modevalues2009)))[1])
+
+values2008 =  df[ which(df$Year==2008), ] 
+modevalues2008 = values2008$dead_and_missing
+mode2008 = as.numeric(names(sort(-table(modevalues2008)))[1])
+
+values2007 =  df[ which(df$Year==2007), ] 
+modevalues2007 = values2007$dead_and_missing
+mode2007 = as.numeric(names(sort(-table(modevalues2007)))[1])
+
+values2006 =  df[ which(df$Year==2006), ] 
+modevalues2006 = values2006$dead_and_missing
+mode2006 = as.numeric(names(sort(-table(modevalues2006)))[1])
+
+values2005 =  df[ which(df$Year==2005), ] 
+modevalues2005 = values2005$dead_and_missing
+mode2005 = as.numeric(names(sort(-table(modevalues2005)))[1])
+
+values2004 =  df[ which(df$Year==2004), ] 
+modevalues2004 = values2004$dead_and_missing
+mode2004 = as.numeric(names(sort(-table(modevalues2004)))[1])
+
+values2003 =  df[ which(df$Year==2003), ] 
+modevalues2003 = values2003$dead_and_missing
+mode2003 = as.numeric(names(sort(-table(modevalues2003)))[1])
+
+values2002 =  df[ which(df$Year==2002), ] 
+modevalues2002 = values2002$dead_and_missing
+mode2002 = as.numeric(names(sort(-table(modevalues2002)))[1])
+
+values2001 =  df[ which(df$Year==2001), ] 
+modevalues2001 = values2001$dead_and_missing
+mode2001 = as.numeric(names(sort(-table(modevalues2001)))[1])
+
+values2000 =  df[ which(df$Year==2000), ] 
+modevalues2000 = values2000$dead_and_missing
+mode2000 = as.numeric(names(sort(-table(modevalues2000)))[1])
+
+#skewness
+skew2016 = skewness(values2016$dead_and_missing, na.rm = TRUE)
+skew2015 = skewness(values2015$dead_and_missing, na.rm = TRUE)
+skew2014 = skewness(values2014$dead_and_missing, na.rm = TRUE)
+skew2013 = skewness(values2013$dead_and_missing, na.rm = TRUE)
+skew2012 = skewness(values2012$dead_and_missing, na.rm = TRUE)
+skew2011 = skewness(values2011$dead_and_missing, na.rm = TRUE)
+skew2010 = skewness(values2010$dead_and_missing, na.rm = TRUE)
+skew2009 = skewness(values2009$dead_and_missing, na.rm = TRUE)
+skew2008 = skewness(values2008$dead_and_missing, na.rm = TRUE)
+skew2007 = skewness(values2007$dead_and_missing, na.rm = TRUE)
+skew2006 = skewness(values2006$dead_and_missing, na.rm = TRUE)
+skew2005 = skewness(values2005$dead_and_missing, na.rm = TRUE)
+skew2004 = skewness(values2004$dead_and_missing, na.rm = TRUE)
+skew2003 = skewness(values2003$dead_and_missing, na.rm = TRUE)
+skew2002 = skewness(values2002$dead_and_missing, na.rm = TRUE)
+skew2001 = skewness(values2001$dead_and_missing, na.rm = TRUE)
+skew2000 = skewness(values2000$dead_and_missing, na.rm = TRUE)
+
+#kurtosis 
+kurt2016 = kurtosis(values2016$dead_and_missing, na.rm = TRUE)
+kurt2015 = kurtosis(values2015$dead_and_missing, na.rm = TRUE)
+kurt2014 = kurtosis(values2014$dead_and_missing, na.rm = TRUE)
+kurt2013 = kurtosis(values2013$dead_and_missing, na.rm = TRUE)
+kurt2012 = kurtosis(values2012$dead_and_missing, na.rm = TRUE)
+kurt2011 = kurtosis(values2011$dead_and_missing, na.rm = TRUE)
+kurt2010 = kurtosis(values2010$dead_and_missing, na.rm = TRUE)
+kurt2009 = kurtosis(values2009$dead_and_missing, na.rm = TRUE)
+kurt2008 = kurtosis(values2008$dead_and_missing, na.rm = TRUE)
+kurt2007 = kurtosis(values2007$dead_and_missing, na.rm = TRUE)
+kurt2006 = kurtosis(values2006$dead_and_missing, na.rm = TRUE)
+kurt2005 = kurtosis(values2005$dead_and_missing, na.rm = TRUE)
+kurt2004 = kurtosis(values2004$dead_and_missing, na.rm = TRUE)
+kurt2003 = kurtosis(values2003$dead_and_missing, na.rm = TRUE)
+kurt2002 = kurtosis(values2002$dead_and_missing, na.rm = TRUE)
+kurt2001 = kurtosis(values2001$dead_and_missing, na.rm = TRUE)
+kurt2000 = kurtosis(values2000$dead_and_missing, na.rm = TRUE)
+
+#coefficient of variation 
+coeffvar2016 = (sd2016 / mean2016)
+coeffvar2015 = (sd2015 / mean2015)
+coeffvar2014 = (sd2014 / mean2014)
+coeffvar2013 = (sd2013 / mean2013)
+coeffvar2012 = (sd2012 / mean2012)
+coeffvar2011 = (sd2011 / mean2011)
+coeffvar2010 = (sd2010 / mean2010)
+coeffvar2009 = (sd2009 / mean2009)
+coeffvar2008 = (sd2008 / mean2008)
+coeffvar2007 = (sd2007 / mean2007)
+coeffvar2006 = (sd2006 / mean2006)
+coeffvar2005 = (sd2005 / mean2005)
+coeffvar2004 = (sd2004 / mean2004)
+coeffvar2003 = (sd2003 / mean2003)
+coeffvar2002 = (sd2002 / mean2002)
+coeffvar2001 = (sd2001 / mean2001)
+coeffvar2000 = (sd2000 / mean2000)
+
+#mean center 
+meanlat2016 = mean((lat2016 = values2016$latitude))
+meanlong2016 = mean((long2016 = values2016$longitude))
+meanlat2015 = mean((lat2015 = values2015$latitude))
+meanlong2015 = mean((long2015 = values2015$longitude))
+meanlat2014 = mean((lat2014 = values2014$latitude))
+meanlong2014 = mean((long2014 = values20146$longitude))
+meanlat2013 = mean((lat2013 = values2013$latitude))
+meanlong2013 = mean((long2013 = values2013$longitude))
+meanlat2012 = mean((lat2012 = values2012$latitude))
+meanlong2012 = mean((long2012 = values2012$longitude))
+meanlat2011 = mean((lat2011 = values2011$latitude))
+meanlong2011 = mean((long2011 = values2011$longitude))
+meanlat2010 = mean((lat2010 = values2010$latitude))
+meanlong2010 = mean((long2010 = values2010$longitude))
+meanlat2009 = mean((lat2009 = values2009$latitude))
+meanlong2009 = mean((long2009 = values2009$longitude))
+meanlat2008 = mean((lat2008 = values2008$latitude))
+meanlong2008 = mean((long2008 = values2008$longitude))
+meanlat2007 = mean((lat2007 = values2007$latitude))
+meanlong2007 = mean((long2007 = values2007$longitude))
+meanlat2006 = mean((lat2006 = values2006$latitude))
+meanlong2006 = mean((long2006 = values2006$longitude))
+meanlat2005 = mean((lat2005 = values2005$latitude))
+meanlong2005 = mean((long2005 = values2005$longitude))
+meanlat2004 = mean((lat2004 = values2004$latitude))
+meanlong2004 = mean((long2004 = values2004$longitude))
+meanlat2003 = mean((lat2003 = values2003$latitude))
+meanlong2003 = mean((long2003 = values2003$longitude))
+meanlat2002 = mean((lat2002 = values2002$latitude))
+meanlong2002 = mean((long2002 = values2002$longitude))
+meanlat2001 = mean((lat2001 = values2001$latitude))
+meanlong2001 = mean((long2001 = values2001$longitude))
+meanlat2000 = mean((lat2000 = values2000$latitude))
+meanlong2000 = mean((long2000 = values2000$longitude))
+
+#weighted mean center 
+wtmeanlat2000 = (sum(sum2000*meanlat2000)/sum2000)
+wtmeanlong2000 = (sum(sum2000*meanlong2000)/sum2000)
+wtmeanlat2000 = ((sum(subset(df, Year == 2000)$dead_and_missing)*(subset(df, Year == 2000)$latitude)))/(sum(subset(df, Year == 2000)$dead_and_missing))
+
+#relative distance 
+standdis2000 = (sqrt((sum(lat-meanlat2000)^2)+(sum(long-meanlong2000)^2)/(count(Year == 2000)))
+
+
+#Creating bar graph
+sum2016 = sum(subset(df, Year == 2016)$dead_and_missing)
+sum2015 = sum(subset(df, Year == 2015)$dead_and_missing)
+sum2014 = sum(subset(df, Year == 2014)$dead_and_missing)
+sum2013 = sum(subset(df, Year == 2013)$dead_and_missing)
+sum2012 = sum(subset(df, Year == 2012)$dead_and_missing)
+sum2011 = sum(subset(df, Year == 2011)$dead_and_missing)
+sum2010 = sum(subset(df, Year == 2010)$dead_and_missing)
+sum2009 = sum(subset(df, Year == 2009)$dead_and_missing)
+sum2008 = sum(subset(df, Year == 2008)$dead_and_missing)
+sum2007 = sum(subset(df, Year == 2007)$dead_and_missing)
+sum2006 = sum(subset(df, Year == 2006)$dead_and_missing)
+sum2005 = sum(subset(df, Year == 2005)$dead_and_missing)
+sum2004 = sum(subset(df, Year == 2004)$dead_and_missing)  #Create an object for the total in 2004
+sum2003 = sum(subset(df, Year == 2003)$dead_and_missing)
+sum2002 = sum(subset(df, Year == 2002)$dead_and_missing)
+sum2001 = sum(subset(df, Year == 2001)$dead_and_missing)
+sum2000 = sum(subset(df, Year == 2000)$dead_and_missing)
+
+years = c("2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016")  #Create labels for the bar graph
+
+pdf("Output_BarGraph.pdf") #Create an object to print the bar graph to
+barplot(c(sum2000,sum2001,sum2002,sum2003,sum2004,sum2005,sum2006,sum2007,sum2008,sum2009,sum2010,sum2011,sum2012,sum2013,sum2014,sum2015,sum2016), 
+        names.arg=years, main = "Number of Missing and Dead", ylab= "Annual Total", xlab = "Year", ylim=c(0,5000)) #Create the bar graph
+dev.off() #Print bar graph
+
+#Creating table
+Year = c(2000:2016) #Create an object for the labels
+sum = (c(sum2000, sum2001, sum2002, sum2003, sum2004, sum2005, sum2006, sum2007, sum2008, sum2009, sum2010, sum2011, sum2012, sum2013, sum2014, sum2015, sum2016))
+means = c(mean2000, mean2001, mean2002, mean2003, mean2004, mean2005, mean2006, mean2007, mean2008, mean2009, mean2010, mean2011, mean2012, mean2013, mean2014, mean2015, mean2016) #Create an object for the means
+sd = (c(sd2000, sd2001, sd2002, sd2003, sd2004, sd2005, sd2006, sd2007, sd2008, sd2009, sd2010, sd2011, sd2012, sd2013, sd2014, sd2015, sd2016))
+mode = (c(mode2000, mode2001, mode2002, mode2003, mode2004, mode2005, mode2006, mode2007, mode2008, mode2009, mode2010, mode2011, mode2012, mode2013, mode2014, mode2015, mode2016))
+skewness = (c(skew2000, skew2001, skew2002, skew2003, skew2004, skew2005, skew2006, skew2007, skew2008, skew2009, skew2010, skew2011, skew2012, skew2013, skew2014, skew2015, skew2016))
+kurtosis = (c(kurt2000, kurt2001, kurt2002, kurt2003, kurt2004, kurt2005, kurt2006, kurt2007, kurt2008, kurt2009, kurt2010, kurt2011, kurt2012, kurt2013, kurt2014, kurt2015, kurt2016))
+coefficient_of_variation = (c(coeffvar2000, coeffvar2001, coeffvar2002, coeffvar2003, coeffvar2004, coeffvar2005, coeffvar2006, coeffvar2007, coeffvar2008, coeffvar2009, coeffvar2010, coeffvar2011, coeffvar2012, coeffvar2013, coeffvar2014, coeffvar2015, coeffvar2016))
+data.for.table = data.frame(Year, sum, means, sd, mode, skewness, kurtosis, coefficient_of_variation)
+
+pdf("Output_Table.pdf") #Create an object to print the table to
+grid.table(round(data.for.table))  #Create table
+dev.off() #Print table
+
+#Create a map with points from OpenStreetMap (OSM) 
+
+#Map for 2016
+lat2016 = values2016$latitude 
+long2016 = values2016$longitude 
+dm2016 = values2016$dead_and_missing 
+xy = data.frame(long2016, lat2016, dm2016) 
+
+
+location = c(min(longitude - 10),min(latitude - 10), max (longitude + 10), max(latitude + 10)) 
+dm.map = get_map(location = location, source = "osm") 
+migrant.map = ggmap(dm.map)
+
+# Add the points layer
+migrant.map = migrant.map + geom_point(data = xy, aes(x = long2016, y = lat2016), size = log(dm2016), alpha = I(0.3)) + labs(x = 'Longitude', y = 'Latitude') + ggtitle('2016')
+
+pdf("Migrant_Map2016.pdf") #Create an object to print the map
+migrant.map
+dev.off() #Print map
+
+
+#Map for 2015
+lat2015 = values2015$latitude 
+long2015 = values2015$longitude 
+dm2015 = values2015$dead_and_missing 
+xy = data.frame(long2015, lat2015, dm2015) 
+
+location = c(min(longitude - 10),min(latitude - 10), max (longitude + 10), max(latitude + 10)) 
+dm.map = get_map(location = location, source = "osm") 
+migrant.map = ggmap(dm.map)
+
+# Add the points layer
+migrant.map = migrant.map + geom_point(data = xy, aes(x = long2015, y = lat2015), size = log(dm2015), alpha = I(0.3)) + labs(x = 'Longitude', y = 'Latitude') + ggtitle('2015')
+
+pdf("Migrant_Map2015.pdf") #Create an object to print the map
+migrant.map
+dev.off() #Print map
+
+
+# Map for 2014
+lat2014 = values2014$latitude  #Create an object for the latitude of points in 2014
+long2014 = values2014$longitude #Create an object for the longitude of points in 2014
+dm2014 = values2014$dead_and_missing #create an object for the dead and missing in 2014
+xy = data.frame(long2014, lat2014, dm2014) #create a dataframe with the three objects
+ 
+location = c(min(longitude - 10),min(latitude - 10), max (longitude + 10), max(latitude + 10)) #Set the boundaries of the map
+dm.map = get_map(location = location, source = "osm") #Create the map
+migrant.map = ggmap(dm.map)
+
+# Add the points layer
+migrant.map = migrant.map + geom_point(data = xy, aes(x = long2014, y = lat2014), size = log(dm2014), alpha = I(0.3)) + labs(x = 'Longitude', y = 'Latitude') + ggtitle('2014')
+
+pdf("Migrant_Map2014.pdf") #Create an object to print the map
+migrant.map
+dev.off() #Print map
+
+
+#Map for 2013
+lat2013 = values2013$latitude 
+long2013 = values2013$longitude 
+dm2013 = values2013$dead_and_missing 
+xy = data.frame(long2013, lat2013, dm2013) 
+
+location = c(min(longitude - 10),min(latitude - 10), max (longitude + 10), max(latitude + 10)) 
+dm.map = get_map(location = location, source = "osm") 
+migrant.map = ggmap(dm.map)
+
+# Add the points layer
+migrant.map = migrant.map + geom_point(data = xy, aes(x = long2013, y = lat2013), size = log(dm2013), alpha = I(0.3)) + labs(x = 'Longitude', y = 'Latitude') + ggtitle('2013')
+
+pdf("Migrant_Map2013.pdf") #Create an object to print the map
+migrant.map
+dev.off() #Print map
+
