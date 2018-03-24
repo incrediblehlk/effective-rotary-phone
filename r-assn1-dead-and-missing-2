@@ -1,0 +1,83 @@
+##Load the libraries
+library(gridExtra)
+library(ggmap)
+
+##Set working directory
+getwd() #First look to see what is the current directory 
+setwd("C:/Users/Heather/Downloads") #Then set the directory to where you want to retrieve and print data
+
+##Read in dadta
+df = data.frame(read.csv("events.csv"), header=TRUE)  #read csv file
+attach(df)  #attach dataset
+
+#Calculating descriptive statistics
+mean2016 = mean(subset(df, Year == 2016)$dead_and_missing) #calculate mean dead and missing for 2016
+mean2015 = mean(subset(df, Year == 2015)$dead_and_missing) 
+mean2014 = mean(subset(df, Year == 2014)$dead_and_missing) 
+
+sd2016 = sd(subset(df, Year == 2016)$dead_and_missing) #calculate standard deviation of dead and missing for 2016
+sd2015 = sd(subset(df, Year == 2015)$dead_and_missing) 
+sd2014 = sd(subset(df, Year == 2014)$dead_and_missing) 
+
+values2016 =  df[ which(df$Year==2016), ] #create an object for only 2016 data
+modevalues2016 = values2016$dead_and_missing #extract the variable for dead and missing
+mode2016 = as.numeric(names(sort(-table(modevalues2016)))[1]) #sort the dataset and read the first row (most frequent)
+
+values2015 =  df[ which(df$Year==2015), ] 
+modevalues2015 = values2015$dead_and_missing
+mode2015 = as.numeric(names(sort(-table(modevalues2015)))[1])
+
+values2014 =  df[ which(df$Year==2014), ] 
+modevalues2014 = values2014$dead_and_missing
+mode2014 = as.numeric(names(sort(-table(modevalues2014)))[1])
+
+#Creating table
+Year = c(2014:2016) #Create an object for the labels
+means = c(mean2014, mean2015, mean2016) #Create an object for the means
+sd = (c(sd2014, sd2015, sd2016))
+mode = (c(mode2014, mode2015, mode2016))
+data.for.table = data.frame(Year, means, sd, mode)
+
+pdf("Output_Table.pdf") #Create an object to print the table to
+grid.table(round(data.for.table,digits = 2)) #Create table
+dev.off() #Print table
+
+#Creating bar graph
+sum2004 = sum(subset(df, Year == 2004)$dead_and_missing)  #Create an object for the total in 2004
+sum2003 = sum(subset(df, Year == 2003)$dead_and_missing)
+sum2002= sum(subset(df, Year == 2002)$dead_and_missing)
+sum2001 = sum(subset(df, Year == 2001)$dead_and_missing)
+
+years = c("2001","2002","2003","2004")  #Create labels for the bar graph
+
+pdf("Output_BarGraph.pdf") #Create an object to print the bar graph to
+barplot(c(sum2001,sum2002,sum2003, sum2004), names.arg=years, main = "Number of Missing and Dead", ylab= "Annual Total", xlab = "Year", ylim=c(0,2000)) #Create the bar graph
+dev.off() #Print bar graph
+
+
+#Create a map with points from OpenStreetMap (OSM)
+lat2014 = values2014$latitude  #Create an object for the latitude of points in 2014
+long2014 = values2014$longitude #Create an object for the longitude of points in 2014
+dm2014 = values2014$dead_and_missing #create an object for the dead and missing in 2014
+xy = data.frame(long2014, lat2014, dm2014) #create a dataframe with the three objects
+ 
+location = c(min(longitude - 10),min(latitude - 10), max (longitude + 10), max(latitude + 10)) #Set the boundaries of the map
+dm.map = get_map(location = location, source = "osm") #Create the map
+migrant.map = ggmap(dm.map)
+
+# Add the points layer
+migrant.map = migrant.map + geom_point(data = xy, aes(x = long2014, y = lat2014), size = log(dm2014), alpha = I(0.3)) + labs(x = 'Longitude', y = 'Latitude') + ggtitle('2014')
+
+pdf("Migrant_Map2014.pdf") #Create an object to print the map
+migrant.map
+dev.off() #Print map
+
+
+mediancalc = df$dead_and_missing
+
+medianofeverything = median(mediancalc)
+
+median2004 = median(subset(df, Year == 2004)$dead_and_missing)
+
+
+detach(df)
