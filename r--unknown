@@ -1,0 +1,22 @@
+# you need to first create an object containing all the values from one year
+values2016 =  df[ which(df$Year==2016), ] 
+
+
+# Create a map of locations of dead and missing for each year.
+
+lat2014 = values2014$latitude #Create an object for the latitude of points in 2014
+long2014 = values2014$longitude #Create an object for the longitude of points in 2014
+dm2014 = values2014$dead_and_missing #create an object for the dead and missing in 2014
+xy = data.frame(long, lat, dm2014) #create a dataframe with the three objects
+
+#Set the boundaries of the map
+location = c(min(longitude - 10),min(latitude - 10), max (longitude + 10), max(latitude + 10)) 
+dm.map = get_map(location = location, source = "osm") #Create the map
+migrant.map = ggmap(dm.map)
+
+# Add the points layer
+migrant.map = migrant.map + geom_point(data = xy, aes(x = long, y = lat),size = log(dm), alpha = I(0.3), xlab = "Longitude")
+
+pdf("Migrant_Map2014.pdf") #Create an object to print the map
+migrant.map
+dev.off() #Print map
