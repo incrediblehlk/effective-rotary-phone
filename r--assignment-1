@@ -1,0 +1,58 @@
+## ASSN 1
+
+# load required libraries
+library(moments)
+library(plotrix)
+
+# set working directory
+setwd("C:/Users/Heather/Desktop/geog410")
+
+# read csv files into r
+dataset=read.csv("C:/Users/Heather/Desktop/geog410/assn1csv.csv")
+
+# attach dataset
+attach(dataset)
+
+names(dataset)
+head(dataset)
+
+# statistics
+mean(Spots)
+median(Spots)
+names(sort(-table(Spots)))[1]
+sd(Spots)
+skewness(Spots)
+kurtosis(Spots)
+
+# new column with calculated values
+dataset = cbind(dataset,fX=Spots*Latitude)
+
+# eqn to calculate statistic from observations
+weightedX = sum(dataset$fX)/sum(Spots)
+
+# histogram
+histogram=hist(Spots, main="Bicycle Parking", xlab="Parking Spots", ylab="Number of Spots")
+
+# print histogram to file
+dev.copy(png,'histogram.png')
+dev.off()
+
+# mean center
+meanLong = mean(Longitude)
+meanLat = mean(Latitude)
+
+# create map
+plot(Longitude,Latitude)
+grid(col = "lightgrey", lty = "solid", lwd = 1)
+
+# draw circle on map (nv=# verts, lty=line type, lwd=line width)
+draw.circle(meanLong,meanLat, 0.00018, nv=100, border="black", col="blue", lty=1, lwd=1)
+
+draw.circle(dataset)
+
+# add text to plot
+#text(cbind(meanLong,meanLat),labels="mean center")
+
+# print to file?
+dev.copy(png,'map_meancenter.png')
+dev.off()
